@@ -11,7 +11,6 @@ piece(brht,blanc,rond,haut,trou).
 piece(brbp,blanc,rond,bas,plein).
 piece(brbt,blanc,rond,bas,trou).
 
-
 %NOIR
 %Carrés
 piece(ncht,noir,carre,haut,trou).
@@ -24,6 +23,11 @@ piece(nrht,noir,rond,haut,trou).
 piece(nrbp,noir,rond,bas,plein).
 piece(nrbt,noir,rond,bas,trou).
 
+%Liste avec tous les emplacements qui peuvent conduire à une victoire \(lignes, colonnes, diagonales)
+winPos([[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[1,5,9,13],[2,6,10,14],[3,7,11,15],[4,8,12,16],[1,6,11,16],[4,7,10,13]]).
+winCon([]).
+
+%Affiche les instructions pour choisir une pièce
 afficheID():-
     write('--- Explication de l\'identifiant : ---'),
     nl,
@@ -39,9 +43,6 @@ afficheID():-
     nl,
     write('Exemple : bcht = Blanc Carré Haut Trou'),
     nl.
-
-winPos([[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[1,5,9,13],[2,6,10,14],[3,7,11,15],[4,8,12,16],[1,6,11,16],[4,7,10,13]]).
-winCon([]).
 
 finPartie(T):-
     J is mod(T,2),
