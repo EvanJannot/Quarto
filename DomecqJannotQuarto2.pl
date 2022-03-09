@@ -78,7 +78,7 @@ finPartie(T):-
     write(J)), %Sinon c'est un tour impaire donc le joueur 1 qui gagne 
     write(' a gagne.'),
     nl,
-    tourJeu(_,_,1,_). %On appelle la fonction de début de jeu mais avec le paramètre 1 qui indique que 1 joueur a gagné
+    tourJeu(_,_,1,_,_). %On appelle la fonction de début de jeu mais avec le paramètre 1 qui indique que 1 joueur a gagné
 
 %Compare 4 caractères ensemble afin de savoir si une ligne, colonne ou diagonale est composée de pièces avec les mêmes caractéristiques
 %On vérifie d'abord si ce n'est pas un chiffre (initialement les cases sont de la forme __nbCase__)
@@ -318,7 +318,11 @@ replace(I, L, E, K) :-
   nth1(I, K, E, R).
 
 %Fonction d'un tour de jeu jusqu'à ce que le jeu s'arrête
-tourJeu(L,T,WinState,J):- 
+tourJeu(L,T,WinState,J,Difficulte):- 
+    (   J == [] ->  
+    write('Le plateau est plein, il y a egalite entre les joueurs'),
+    nl,
+    stopProlog;
     listeLettresNJ(NewListe),
     %ID = identifiant de la pièce, C = case, L = liste des pièces sur la grille de jeu
     %T = tour, WinState = état de la partie (0=personne n'a gagné, 1=il y a un gagnant), J = liste des pièces Jouables.
@@ -338,8 +342,8 @@ tourJeu(L,T,WinState,J):-
     write('Liste des coups jouables :'),
         nl,
     write(R), %Affiche la liste R qui correspond aux pièces non jouées donc aux coups jouables
-    %conseilPiece(R), Conseil une pièce au joueur parmi les pièces dispos
-    evaluationPiece(R,0,NewListe,Sortie), %Récupère la liste des pièces non jouées sous forme de lettres
+    (   Difficulte==0 ->  
+     evaluationPiece(R,0,NewListe,Sortie), %Récupère la liste des pièces non jouées sous forme de lettres
     compteOccurence(Sortie,b,0,0,OccurenceB),
     compteOccurence(Sortie,n,0,0,OccurenceN),
     compteOccurence(Sortie,c,0,0,OccurenceC),
@@ -348,10 +352,15 @@ tourJeu(L,T,WinState,J):-
     compteOccurence(Sortie,s,0,0,OccurenceS),
     compteOccurence(Sortie,p,0,0,OccurenceP),
     compteOccurence(Sortie,t,0,0,OccurenceT),
-    plusPresente(OccurenceB,OccurenceN,OccurenceC,OccurenceR,OccurenceH,OccurenceS,OccurenceP,OccurenceT),
+    plusPresente(OccurenceB,OccurenceN,OccurenceC,OccurenceR,OccurenceH,OccurenceS,OccurenceP,OccurenceT);
+    write('')),
+    (   Difficulte == 1 ->  
+    conseilPiece(R); %Conseil une pièce au joueur parmi les pièces dispos
+    write('')),
     nl,
-    tourJeu(K,T2,WinState,R); %Relance un tour
-    stopProlog). %Si quelqu'un a gagné on arrête le jeu
+    nl,
+    tourJeu(K,T2,WinState,R,Difficulte); %Relance un tour
+    stopProlog)). %Si quelqu'un a gagné on arrête le jeu
 
 %Fonction pour conseiller une pièce aléatoire parmi celles restantes
 conseilPiece(L):- 
@@ -416,8 +425,7 @@ plusPresente(B,N,C,R,H,S,P,T):-
     nl,
     nl, %On récupère les lettres qui reviennent le plus et on les propose 
     (   B==N, N==C, C==R, R==H, H==S, S==P, P==T ->  %Si toutes les caractéristiques sont autant présente, on laisse le choix
-    write('Les caracteristiques sont toutes presentes dans la meme proportion, prenez celle que vous souhaitez.'),
-        nl;
+    write('Les caracteristiques sont toutes presentes dans la meme proportion, prenez celle que vous souhaitez.');
     (   max_member(B, L) ->  write('Piece Blanche'),nl;write('')),
      (   max_member(N, L) ->  write('Piece Noire'),nl;write('')),
      (   max_member(C, L) ->  write('Piece Carree'),nl;write('')),
@@ -461,5 +469,24 @@ jouer:-
     nl,
     nl,
     listePiece(J), %Définie listePiece comme la liste J 
-    tourJeu(L,2,0,J). %Lance le corps du jeu
+    write('Veuillez sélectionner une difficulté pour le jeu :'),
+    nl,
+    nl,
+    write('0 = conseil pour choisir une piece par l\'IA'),
+    nl,
+    write('1 = proposition d\'un coup aleatoire'),
+    nl,
+    write('2 = aucune aide'),
+    choixDifficulte(Difficulte),
+    nl,
+    tourJeu(L,2,0,J,Difficulte). %Lance le corps du jeu
 
+choixDifficulte(Diff):-
+    read(D),
+    (   D \= 0, D \= 1, D \= 2 ->  
+    nl,
+    write('Veuillez choisir une difficulte existante'),
+    choixDifficulte(Diff);
+    Diff is D,
+    write('')).
+    
