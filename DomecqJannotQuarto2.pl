@@ -1,4 +1,4 @@
-%Définition des pièces (couleur,forme,taille,remplissage,positionX,positionY,état en jeu)
+%Définition des pièces 
 %BLANC
 %Carrés
 	%Hauts
@@ -410,7 +410,7 @@ plusPresente(B,N,C,R,H,S,P,T):-
     L = [B,N,C,R,H,S,P,T], %On place les occurences dans une liste
     nl,
     nl,
-    write('Notre IA vous conseille les caracteristiques les moins présentes parmi celles des pieces jouables'),
+    write('Notre IA vous conseille les caracteristiques les moins presentes parmi celles des pieces jouables'),
     nl,
     write('Choisissez une piece avec l\'une des caracteristiques suivante:'),
     nl,
