@@ -40,7 +40,7 @@ winCon([]).
 listePiece([bcht,bchp,bcst,bcsp,brhp,brht,brsp,brst,ncht,nchp,ncst,ncsp,nrhp,nrht,nrsp,nrst]).
 %Contient les pièces qui ont été posées. Cette liste permet de déterminer les coups jouables ou non
 piecePosee(['_01_', '_02_', '_03_','_04_', '_05_', '_06_', '_07_', '_08_', '_09_', '_10_', '_11_', '_12_', '_13_', '_14_', '_15_','_16_']).
-listeVide([]).
+listeLettresNJ([]).
 
 %%% FONCTIONS DE FIN DU JEU %%%
 
@@ -78,7 +78,7 @@ finPartie(T):-
     write(J)), %Sinon c'est un tour impaire donc le joueur 1 qui gagne 
     write(' a gagne.'),
     nl,
-    choixPiece(_,_,_,_,1,_). %On appelle la fonction de début de jeu mais avec le paramètre 1 qui indique que 1 joueur a gagné
+    tourJeu(_,_,1,_). %On appelle la fonction de début de jeu mais avec le paramètre 1 qui indique que 1 joueur a gagné
 
 %Compare 4 caractères ensemble afin de savoir si une ligne, colonne ou diagonale est composée de pièces avec les mêmes caractéristiques
 %On vérifie d'abord si ce n'est pas un chiffre (initialement les cases sont de la forme __nbCase__)
@@ -132,8 +132,8 @@ isWinner(L,T,E,Lettre,ListeLettres):-
 		%recupChar va récupérer les lettres 4 à 4 pour les comparer et détecter la victoire
 
 %Permet de stopper le jeu en affichant false.
-stopProlog(I):-
-    piece(I).
+stopProlog:-
+    piece(1).
 
 %%% FONCTIONS D'AFFICHAGE %%%
 
@@ -235,7 +235,7 @@ afficheLigne:-
 %%% FONCTIONS POUR VERIFIER QU'UN TOUR EST JOUABLE (PIECE ET CASE VIABLES)
 
 %Fonction qui vérifie si l'identifiant d'une case est viable 
-verifID(ID,X,T,L):- 
+verifID(X,T,L):- 
     % ID étant l'identifiant, X l'ID qui sera retourné si il est valable, T le tour de jeu, L la liste des pièces posées
     (   0 is mod(T,2) ->  %Changement du texte en fonction du tour de jeu
    	write('--- J1 choisi l\'identifiant d\'une piece ---'),
@@ -245,10 +245,14 @@ verifID(ID,X,T,L):-
     nl,
     (   member(ID,L) -> %Si il appartient à la liste des pièces sur le plateau on le signale
     write('Cette piece a deja ete posee, prenez en une autre.'),
-    verifID(_,X,T,L); %On relance la fonction 
+        nl,
+        nl,
+    verifID(X,T,L); %On relance la fonction 
     (piece(ID) ->  X=ID; %On vérifie si il y a une pièce qui comporte cet ID et si oui on autorise l'entrée du joueur
     write('Cette ID n\'existe pas veuillez en selectionner un autre.'), %Sinon on le previent que l'id n'est associé à aucune pièce
-    verifID(_,X,T,L))); %On relance la fonction
+    nl,
+        nl,
+    verifID(X,T,L))); %On relance la fonction
    	write('--- J2 choisi l\'identifiant d\'une piece ---'), %Changement du texte en fonction du tour de jeu
     nl,
     nl,
@@ -256,19 +260,23 @@ verifID(ID,X,T,L):-
     nl,
     (   member(ID,L) ->
     write('Cette piece a deja ete posee, prenez en une autre.'),
-    verifID(_,X,T,L);
+         nl,
+        nl,
+    verifID(X,T,L);
     (piece(ID) ->  X=ID;
     write('Cette ID n\'existe pas veuillez en sélectionner un autre.'),
-    verifID(_,X,T,L)))).
+         nl,
+        nl,
+    verifID(X,T,L)))).
 
 %Vérifie si une case est jouable 
-verifCase(C,X,L,ID,T):- 
-    %C est la case, X retournera la case si elle est validée, L la liste des lettres, ID l'id de la pièce sélectionnée précédemment, T le tour
+verifCase(X,L,T):- 
+    %X retournera la case si elle est validée, L la liste des lettres, ID l'id de la pièce sélectionnée précédemment, T le tour
     (   0 is mod(T,2) ->  %on change l'affichage en fonction du tour 
     write('--- J2 choisi une case ---'),
     nl,
     nl,
-    read(C), %On lit l'entrée
+    read(C), %On lit l'entrée qu'on stocke dans C
     nl,
     ( C=<16, C>0 ->  %On vérifie que le numéro choisie est entre 1 et 16.
     C1 is C-1, %On enlève 1 à l'entrée car l'indice des listes commence à 0 donc il y a un décalage
@@ -277,30 +285,30 @@ verifCase(C,X,L,ID,T):-
     write('Cette case est deja prise veuillez en selectionner une autre.'), %On indique qu'il y a déjà une pièce dedans
     nl,
     nl,
-    verifCase(_,X,L,ID,T) ; %On relance la fonction si la case est déjà occupée
+    verifCase(X,L,T) ; %On relance la fonction si la case est déjà occupée
     X=C);
     write('Cette case n\'existe pas veuillez en selectionner une autre.'), %On indique que la case n'existe pas
     nl,
     nl,
-    verifCase(_,X,L,ID,T)); %On relance la fonction si la case choisie n'existe pas 
+    verifCase(X,L,T)); %On relance la fonction si la case choisie n'existe pas 
      write('--- J1 choisi une case ---'), %On change l'affichage en fonction du tour
     nl,
     nl,
     read(C),
     nl,
-    ( C=<16 ->  
+    ( C=<16, C>0 ->  
     C1 is C-1,
     nth0(C1,L,E),
     (piece(E)-> 
     write('Cette case est deja prise veuillez en selectionner une autre.'),
     nl,
     nl,
-    verifCase(_,X,L,ID,T) ;
+    verifCase(X,L,T) ;
     X=C);
     write('Cette case n\'existe pas veuillez en selectionner une autre.'),
     nl,
     nl,
-    verifCase(_,X,L,ID,T))).
+    verifCase(X,L,T))).
 
 %%% FONCTIONS DE JEU %%%
 
@@ -310,14 +318,14 @@ replace(I, L, E, K) :-
   nth1(I, K, E, R).
 
 %Fonction d'un tour de jeu jusqu'à ce que le jeu s'arrête
-choixPiece(ID,C,L,T,WinState,J):- 
-    listeVide(NewListe),
+tourJeu(L,T,WinState,J):- 
+    listeLettresNJ(NewListe),
     %ID = identifiant de la pièce, C = case, L = liste des pièces sur la grille de jeu
     %T = tour, WinState = état de la partie (0=personne n'a gagné, 1=il y a un gagnant), J = liste des pièces Jouables.
     (   WinState ==0 ->  %Si personne n'a gagné
     winCon(ListeLettres), %Défini la liste WinCon comme la liste des lettres placées 
-    verifID(ID,ID2,T,L), %Demande au joueur de jouer et vérifie la pièce
-    verifCase(C,C2,L,ID2,T), %Demande au joueur suivant de choisir une case et la vérifie
+    verifID(ID2,T,L), %Demande au joueur de jouer et vérifie la pièce
+    verifCase(C2,L,T), %Demande au joueur suivant de choisir une case et la vérifie
     replace(C2,L,ID2,K), %Remplace dans la liste des cases, le numéro de la case par la pièece
     afficheID, %Affiche les instructions sur l'identifiant des pièces
     nl,
@@ -326,7 +334,9 @@ choixPiece(ID,C,L,T,WinState,J):-
     T2 is T+1, %Augmente de 1 le tour 
     select(ID2,J,R), %Retire la pièce choisie par le joueur de la liste J des pièces et retourne le résultat dans la liste R
     nl,
+    nl,
     write('Liste des coups jouables :'),
+        nl,
     write(R), %Affiche la liste R qui correspond aux pièces non jouées donc aux coups jouables
     %conseilPiece(R), Conseil une pièce au joueur parmi les pièces dispos
     evaluationPiece(R,0,NewListe,Sortie), %Récupère la liste des pièces non jouées sous forme de lettres
@@ -338,30 +348,12 @@ choixPiece(ID,C,L,T,WinState,J):-
     compteOccurence(Sortie,s,0,0,OccurenceS),
     compteOccurence(Sortie,p,0,0,OccurenceP),
     compteOccurence(Sortie,t,0,0,OccurenceT),
-    moinsPresente(OccurenceB,OccurenceN,OccurenceC,OccurenceR,OccurenceH,OccurenceS,OccurenceP,OccurenceT),
+    plusPresente(OccurenceB,OccurenceN,OccurenceC,OccurenceR,OccurenceH,OccurenceS,OccurenceP,OccurenceT),
     nl,
-    choixPiece(_,_,K,T2,WinState,R); %Relance un tour
-    stopProlog(0)). %Si quelqu'un a gagné on arrête le jeu
+    tourJeu(K,T2,WinState,R); %Relance un tour
+    stopProlog). %Si quelqu'un a gagné on arrête le jeu
 
-%Fonction du premier tour de jeu
-choixPiece(ID,X):- 
-    write('################################'),
-    nl,
-    write('=== QUARTO by FRANCOIS & EVAN =='),
-    nl,
-    write('################################'),
-    nl,
-    nl,
-    afficheID, %Affiche les instructions pour choisir une pièce
-    nl,
-    piecePosee(L), %Défini piecePosee comme la liste L
-    afficheGrille(L), %Affiche la grille initiale
-    nl,
-    nl,
-    listePiece(J), %Définie listePiece comme la liste J 
-    choixPiece(ID,X,L,2,0,J). %Lance le corps du jeu
-
-%Fonction pour conseiller une pièce parmi celles restantes
+%Fonction pour conseiller une pièce aléatoire parmi celles restantes
 conseilPiece(L):- 
     nth0(0,L,T), %On prend la première piéce que l'on retourne sous le nom T
     (   T\=''  ->  %Si il y a une pièce 
@@ -373,6 +365,7 @@ conseilPiece(L):-
     write(X); %On conseil de jouer la pièce X qui est une pièce aléatoire de la liste des coups possible
     write('R existe pas')). %Sinon on renvoie un message d'erreur
 
+%Recupere les lettres des pieces qui ne sont pas posées 
 evaluationLettre(E,I,ListeL,NewListeF):-
     (   I<4  -> 
     sub_atom(E,I,1,_,Char1), %On récupère la première lettre
@@ -388,8 +381,9 @@ evaluationLettre(E,I,ListeL,NewListeF):-
     append(NewListe3,[Char4],NewListeF);
     write('')).
 
+%Evalue la meilleure piece à proposer au joueur adverse
 evaluationPiece(ListeNonJouee,I,NewListe,Sortie):-
-    listeVide(L),
+    listeLettresNJ(L),
     length(ListeNonJouee,Y),
     (   I<Y ->  
      nth0(I,ListeNonJouee,E), %On récupère l'élément I de la liste des coups non joués
@@ -399,28 +393,31 @@ evaluationPiece(ListeNonJouee,I,NewListe,Sortie):-
     evaluationPiece(ListeNonJouee,I2,K,Sortie); %On continue avec l'élément suivant de la liste
     Sortie = NewListe). %Une fois la liste finie, on définie la sortie comme cette liste
 
+%Fonction qui compte l'occurence de chaque lettre des pieces non jouées 
 compteOccurence(L,E,O,Indice,Occurence):-
     length(L,Longueur),
     (   Indice < Longueur ->  
-    nth0(Indice,L,Element),
-    (   Element == E ->  
-    NewO is O+1;
-    NewO is O,
-    write('')),
+    nth0(Indice,L,Element), %On récupère la lettre I de notre liste
+    (   Element == E ->  %On regarde si c'est la lettre dont on compte l'occurence
+    NewO is O+1; %On incremente l'occurence de 1
+    NewO is O),
     NewIndice is Indice+1,
-    compteOccurence(L,E,NewO,NewIndice,Occurence); 
-    Occurence is O,
-    write('')).
+    compteOccurence(L,E,NewO,NewIndice,Occurence); %On continue de parcourir la liste
+    Occurence is O).
 
-moinsPresente(B,N,C,R,H,S,P,T):-
-    L = [B,N,C,R,H,S,P,T],
+%Compare les occurences de toutes les caractéristiques
+plusPresente(B,N,C,R,H,S,P,T):-
+    L = [B,N,C,R,H,S,P,T], %On place les occurences dans une liste
     nl,
     nl,
     write('Notre IA vous conseille les caracteristiques les moins présentes parmi celles des pieces jouables'),
     nl,
     write('Choisissez une piece avec l\'une des caracteristiques suivante:'),
     nl,
-    nl,
+    nl, %On récupère les lettres qui reviennent le plus et on les propose 
+    (   B==N, N==C, C==R, R==H, H==S, S==P, P==T ->  %Si toutes les caractéristiques sont autant présente, on laisse le choix
+    write('Les caracteristiques sont toutes presentes dans la meme proportion, prenez celle que vous souhaitez.'),
+        nl;
     (   max_member(B, L) ->  write('Piece Blanche'),nl;write('')),
      (   max_member(N, L) ->  write('Piece Noire'),nl;write('')),
      (   max_member(C, L) ->  write('Piece Carree'),nl;write('')),
@@ -428,9 +425,41 @@ moinsPresente(B,N,C,R,H,S,P,T):-
      (   max_member(H, L) ->  write('Piece Haute'),nl;write('')),
      (   max_member(S, L) ->  write('Piece Basse'),nl;write('')),
      (   max_member(P, L) ->  write('Piece Pleine'),nl;write('')),
-     (   max_member(T, L) ->  write('Piece avec un Trou'),nl;write('')).
+     (   max_member(T, L) ->  write('Piece avec un Trou'),nl;write(''))).
 
-%Fonction pour lancer le jeu
-jouer:-
-    choixPiece(_,_).
+%Fonction du premier tour de jeu
+jouer:- 
+    write('################################'),
+    nl,
+    write('=== QUARTO by FRANCOIS & EVAN =='),
+    nl,
+    write('################################'),
+    nl,
+    nl,
+    write('================================='),
+    nl,
+    write('--------- Regles du jeu ---------'),
+    nl,
+    write('================================='),
+    nl,
+    nl,
+    write('L\'objectif du jeu est d\'aligner quatre pieces ayant au moins un point commun entre elles.'),
+    nl,
+    write('Mais chaque joueur ne joue pas ce qu\'il veut, c\'est son adversaire qui choisit pour lui.'),
+    nl,
+    write('Les seize pieces du jeu, toutes differentes, possedent chacune quatre caracteres distincts : haute ou basse, ronde ou carree, blanche ou noire, pleine ou trouee.'),
+    nl,
+    write('Chacun a son tour choisit et donne une piece a l\'adversaire, qui doit la jouer sur une case libre.'),
+    nl,
+    write('Le gagnant est celui qui, avec une piece reçue, cree un alignement de quatre pieces ayant au moins un caractere commun.'),
+    nl,
+    nl,
+    afficheID, %Affiche les instructions pour choisir une pièce
+    nl,
+    piecePosee(L), %Défini piecePosee comme la liste L
+    afficheGrille(L), %Affiche la grille initiale
+    nl,
+    nl,
+    listePiece(J), %Définie listePiece comme la liste J 
+    tourJeu(L,2,0,J). %Lance le corps du jeu
 
