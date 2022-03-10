@@ -469,7 +469,7 @@ jouer:-
     nl,
     nl,
     listePiece(J), %Définie listePiece comme la liste J 
-    write('Veuillez sélectionner une difficulté pour le jeu :'),
+    write('Veuillez sélectionner une difficulte pour le jeu :'),
     nl,
     nl,
     write('0 = conseil pour choisir une piece par l\'IA'),
@@ -477,15 +477,17 @@ jouer:-
     write('1 = proposition d\'un coup aleatoire'),
     nl,
     write('2 = aucune aide'),
-    choixDifficulte(Difficulte),
+    choixDifficulte(Difficulte),  %On demande l'aide que souhaite le joueur
     nl,
     tourJeu(L,2,0,J,Difficulte). %Lance le corps du jeu
 
+%Permet de demander au joueur quelle type d'aide il souhaite
 choixDifficulte(Diff):-
+    nl,
     read(D),
     (   D \= 0, D \= 1, D \= 2 ->  
     nl,
-    write('Veuillez choisir une difficulte existante'),
+    write('Veuillez choisir une difficulte existante'), %Tant que l'entrée n'est pas bonne on redemande
     choixDifficulte(Diff);
     Diff is D,
     write('')).
